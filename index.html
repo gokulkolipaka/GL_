@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Event Check-In</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            width: 80%;
+            margin: auto;
+            text-align: center;
+        }
+        .search-bar {
+            margin-bottom: 20px;
+        }
+        .attendee {
+            padding: 10px;
+            border: 1px solid #ccc;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .check-in-btn {
+            padding: 10px;
+            color: white;
+            background-color: red;
+            border: none;
+            cursor: pointer;
+        }
+        .checked-in {
+            background-color: green;
+        }
+        .undo-btn {
+            padding: 10px;
+            color: white;
+            background-color: gray;
+            border: none;
+            cursor: pointer;
+        }
+        .download-btn {
+            padding: 10px;
+            color: white;
+            background-color: blue;
+            border: none;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Event Check-In</h1>
+        <div class="search-bar">
+            <input type="text" id="search" placeholder="Search by name...">
+        </div>
+        <div id="attendee-list"></div>
+        <button class="download-btn" onclick="downloadCSV()">Download Checked-In List</button>
+    </div>
+    
+    <script>
+        const attendees = [
+            { name: "Aditya Rajendra Kaware", contact: "+919860566041", checkedIn: false },
+            { name: "Aiswarya Surapaneni", contact: "+918897314372", checkedIn: false },
+            { name: "Ajay Kumar Juluru", contact: "+919574973459", checkedIn: false }
+        ];
+
+        const renderAttendees = (filter = '') => {
+            const list = document.getElementById('attendee-list');
+            list.innerHTML = '';
+            attendees.filter(a => a.name.toLowerCase().includes(filter.toLowerCase())).forEach((attendee, index) => {
+                const attendeeDiv = document.createElement('div');
+                attendeeDiv.className = 'attendee';
+                if (attendee.checkedIn) attendeeDiv.classList.add('checked-in');
+                attendeeDiv.innerHTML = `
+                    <span>${attendee.name} (${attendee.contact})</span>
+                    <button class="check-in-btn" onclick="toggleCheckIn(${index})">${attendee.checkedIn ? 'Undo Check-In' : 'Check-In'}</button>
+                `;
+                list.appendChild(attendeeDiv);
+            });
+        };
+
+        const toggleCheckIn = (index) => {
+            attendees[index].checkedIn = !attendees[index].checkedIn;
+            renderAttendees(document.getElementById('search').value);
+        };
+
+        const downloadCSV = () => {
+            const checkedInAttendees = attendees.filter(a => a.checkedIn);
+            let csvContent = "data:text/csv;charset=utf-8,Name,Contact\n";
+            checkedInAttendees.forEach(attendee => {
+                csvContent += `${attendee.name},${attendee.contact}\n`;
+            });
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement('a');
+            link.setAttribute('href', encodedUri);
+            link.setAttribute('download', 'checked_in_attendees.csv');
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        };
+
+        document.getElementById('search').addEventListener('input', (e) => {
+            renderAttendees(e.target.value);
+        });
+
+        // Initial render
+        renderAttendees();
+    </script>
+</body>
+</html>
